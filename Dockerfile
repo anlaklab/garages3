@@ -2,13 +2,14 @@
 FROM alpine:3.19
 
 # Install dependencies
-RUN apk add --no-cache gettext supervisor
+RUN apk add --no-cache gettext supervisor curl
 
 # Copy garage binary from official image
 COPY --from=dxflrs/garage:v2.1.0 /garage /garage
 
-# Copy garage-webui from its image
-COPY --from=khairul169/garage-webui:latest /app/garage-webui /garage-webui
+# Download garage-webui from GitHub releases
+RUN curl -L -o /garage-webui https://github.com/khairul169/garage-webui/releases/latest/download/garage-webui-linux-amd64 \
+    && chmod +x /garage-webui
 
 # Copy configuration template
 COPY garage.toml /etc/garage.toml.template
