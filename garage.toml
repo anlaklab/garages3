@@ -35,24 +35,24 @@ rpc_public_addr = "127.0.0.1:3901"
 
 # S3 API Configuration
 [s3_api]
-# S3 API endpoint - exposed via s3.anlak.es
+# S3 API endpoint - exposed via s3.anlakstudio.com
 api_bind_addr = "[::]:3900"
 
 # S3 region (can be any string, but must be consistent)
 s3_region = "garage"
 
 # Root domain for virtual-host style bucket access
-# With this config: bucket "mybucket" accessible at mybucket.s3.anlak.es
-root_domain = ".s3.anlak.es"
+# With this config: bucket "mybucket" accessible at mybucket.s3.anlakstudio.com
+root_domain = ".s3.anlakstudio.com"
 
 # S3 Web (Static Website Hosting) Configuration
 [s3_web]
-# Web interface - exposed via files.anlak.es
+# Static file hosting
 bind_addr = "[::]:3902"
 
 # Root domain for web access
-# Buckets configured as websites will be accessible at <bucket>.files.anlak.es
-root_domain = ".files.anlak.es"
+# Buckets configured as websites will be accessible at <bucket>.web.anlakstudio.com
+root_domain = ".web.anlakstudio.com"
 
 # Admin API Configuration
 [admin]
