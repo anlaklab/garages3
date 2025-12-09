@@ -20,7 +20,7 @@ sed -e "s|__RPC_SECRET__|$RPC_SECRET|g" \
     /etc/garage.toml.template > /etc/garage.toml
 
 echo "Configuration generated successfully"
-echo "Starting Garage server..."
+echo "Starting Garage server and WebUI..."
 
-# Start Garage
-exec /garage server
+# Start both services with supervisord
+exec /usr/bin/supervisord -c /etc/supervisord.conf
