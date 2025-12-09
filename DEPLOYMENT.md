@@ -4,84 +4,98 @@
 
 This setup deploys Garage S3-compatible storage with:
 - **s3.anlak.es** - S3 API endpoint (port 3900)
-- **files.anlak.es** - Admin Web UI (port 3909)
 
 ## Files Structure
 
 ```
-├── docker-compose.yml    # Docker compose configuration
-├── garage.toml           # Garage configuration
-├── .env                  # Environment variables (admin token)
-├── .env.example          # Environment template
-└── setup.sh              # Initial setup script
+├── Dockerfile            # Docker build configuration
+├── entrypoint.sh         # Startup script with env var substitution
+├── garage.toml           # Garage configuration template
+├── .env.example          # Environment variables reference
+└── setup.sh              # Initial cluster setup script
 ```
 
 ## Dokploy Deployment Steps
 
-### 1. Create a New Project in Dokploy
+### 1. Create a New Application in Dokploy
 
 1. Go to Dokploy dashboard
 2. Create a new project (e.g., "garage-s3")
+3. Add Application → Select "GitHub" or "Git"
+4. Connect to repository: `anlaklab/garages3`
 
-### 2. Deploy Using Docker Compose
+### 2. Configure Environment Variables
 
-1. In the project, select "Add Service" → "Docker Compose"
-2. Upload these files:
-   - `docker-compose.yml`
-   - `garage.toml`
-   - `.env`
+In Dokploy, go to **Environment** and add:
 
-### 3. Configure Domains in Dokploy
+```
+RPC_SECRET=<generate-with-openssl-rand-hex-32>
+ADMIN_TOKEN=<generate-with-openssl-rand-base64-32>
+```
 
-Add two domains/routes:
+Generate secrets:
+```bash
+openssl rand -hex 32      # for RPC_SECRET
+openssl rand -base64 32   # for ADMIN_TOKEN
+```
 
-#### Route 1: S3 API
+### 3. Configure Volumes (Persistent Storage)
+
+In Dokploy, add these volume mounts:
+
+| Container Path | Description |
+|----------------|-------------|
+| `/var/lib/garage/meta` | Metadata storage |
+| `/var/lib/garage/data` | Object data storage |
+
+### 4. Configure Domain in Dokploy
+
+#### S3 API
 - **Domain**: `s3.anlak.es`
 - **Port**: `3900`
 - **SSL**: Enable (Let's Encrypt)
 
-#### Route 2: Admin Web UI
-- **Domain**: `files.anlak.es`
-- **Port**: `3909`
-- **SSL**: Enable (Let's Encrypt)
+### 5. Deploy and Initialize
 
-### 4. Deploy and Initialize
-
-1. Deploy the service in Dokploy
-2. SSH into your server or use Dokploy's terminal
-3. Run the setup script:
+1. Deploy the application in Dokploy
+2. Open the terminal in Dokploy (or SSH into your server)
+3. Initialize the cluster:
 
 ```bash
-# If using the setup script directly
-./setup.sh
+# Find your container name (usually includes the app name)
+docker ps | grep garage
 
-# Or manually execute:
-docker exec garage garage status
-docker exec garage garage layout assign -z dc1 -c 10G <NODE_ID>
-docker exec garage garage layout apply --version 1
+# Check status and get NODE_ID
+docker exec <container-name> /garage status
+
+# Assign storage capacity (adjust size as needed)
+docker exec <container-name> /garage layout assign -z dc1 -c 10G <NODE_ID>
+
+# Apply the layout
+docker exec <container-name> /garage layout apply --version 1
 ```
 
-### 5. Create Buckets and Keys
+### 6. Create Buckets and Keys
 
 ```bash
 # Create a bucket
-docker exec garage garage bucket create mybucket
+docker exec <container-name> /garage bucket create mybucket
 
 # Create an access key
-docker exec garage garage key create mykey
+docker exec <container-name> /garage key create mykey
 
 # Grant permissions
-docker exec garage garage bucket allow --read --write --owner mybucket --key mykey
+docker exec <container-name> /garage bucket allow --read --write --owner mybucket --key mykey
 
-# Get key credentials
-docker exec garage garage key info mykey
+# Get key credentials (save these!)
+docker exec <container-name> /garage key info mykey
 ```
 
-### 6. Enable Website Hosting (for files.anlak.es)
+### 7. Enable Website Hosting (Optional)
 
 ```bash
 # Enable website mode for a bucket
-docker exec garage garage bucket website --allow mybucket
+docker exec <container-name> /garage bucket website --allow mybucket
 ```
 
 ## Using the S3 API
@@ -131,22 +145,11 @@ aws --endpoint-url https://s3.anlak.es s3 cp index.html s3://mybucket/
 # Access at: https://mybucket.files.anlak.es/
 ```
 
-## Using the Admin Web UI
-
-Once deployed, access the Admin Web UI at `https://files.anlak.es`
-
-The WebUI allows you to:
-- View cluster status and node information
-- Create and manage buckets
-- Create and manage access keys
-- Browse and manage objects in buckets
-- Configure bucket permissions
-
 ## Security Notes
 
 1. Keep the admin API (port 3903) internal only - don't expose it publicly
 2. Use strong, unique access keys for each application
-3. The `.env` file contains sensitive tokens - keep it secure
+3. Set environment variables securely in Dokploy (never commit secrets)
 
 ## Scaling (Optional)
 
@@ -160,22 +163,19 @@ For production with multiple nodes:
 
 ```bash
 # Check Garage status
-docker exec garage garage status
+docker exec <container-name> /garage status
 
 # View layout
-docker exec garage garage layout show
+docker exec <container-name> /garage layout show
 
 # List all buckets
-docker exec garage garage bucket list
+docker exec <container-name> /garage bucket list
 
 # List all keys
-docker exec garage garage key list
+docker exec <container-name> /garage key list
 
 # Check logs
-docker logs garage
-
-# Check WebUI logs
-docker logs garage-webui
+docker logs <container-name>
 ```
 
 ## Volumes
