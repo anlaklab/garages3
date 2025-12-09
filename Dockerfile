@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=dxflrs/garage:v2.1.0 /garage /garage
 
 # Download garage-webui from GitHub releases
-RUN curl -L -o /garage-webui https://github.com/khairul169/garage-webui/releases/latest/download/garage-webui-linux-amd64 \
+RUN curl -fSL -o /garage-webui https://github.com/khairul169/garage-webui/releases/download/1.1.0/garage-webui-v1.1.0-linux-amd64 \
     && chmod +x /garage-webui
 
 # Copy configuration template
