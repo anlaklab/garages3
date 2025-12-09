@@ -1,0 +1,68 @@
+# Garage Configuration
+# Documentation: https://garagehq.deuxfleurs.fr/documentation/reference-manual/configuration/
+
+# Metadata directory (small, fast storage recommended - SSD)
+metadata_dir = "/var/lib/garage/meta"
+
+# Data directory (large storage for actual objects)
+data_dir = "/var/lib/garage/data"
+
+# Database engine (lmdb is recommended for production)
+db_engine = "lmdb"
+
+# Block size for data chunks (default 1MB)
+block_size = "1M"
+
+# Replication mode
+# For single-node: 1 or "none"
+# For multi-node production: 2 or 3
+replication_factor = 1
+
+# Compression level (default: 1, range: 0-19, higher = better compression but slower)
+compression_level = 1
+
+# RPC Configuration (inter-node communication)
+[rpc]
+# Secret key for RPC authentication (32 bytes hex)
+# Generate with: openssl rand -hex 32
+rpc_secret = "__RPC_SECRET__"
+
+# Bind address for RPC
+bind_addr = "[::]:3901"
+
+# Public address for this node (used for node discovery)
+# For Docker, use the container's reachable address
+public_addr = "127.0.0.1:3901"
+
+# S3 API Configuration
+[s3_api]
+# S3 API endpoint - exposed via s3.anlak.es
+api_bind_addr = "[::]:3900"
+
+# S3 region (can be any string, but must be consistent)
+s3_region = "garage"
+
+# Root domain for virtual-host style bucket access
+# With this config: bucket "mybucket" accessible at mybucket.s3.anlak.es
+root_domain = ".s3.anlak.es"
+
+# S3 Web (Static Website Hosting) Configuration
+[s3_web]
+# Web interface - exposed via files.anlak.es
+bind_addr = "[::]:3902"
+
+# Root domain for web access
+# Buckets configured as websites will be accessible at <bucket>.files.anlak.es
+root_domain = ".files.anlak.es"
+
+# Admin API Configuration
+[admin]
+# Admin API endpoint
+api_bind_addr = "[::]:3903"
+
+# Admin token for API access
+# Generate with: openssl rand -base64 32
+admin_token = "__ADMIN_TOKEN__"
+
+# Enable metrics endpoint
+metrics_token = "__ADMIN_TOKEN__"
