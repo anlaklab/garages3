@@ -1,8 +1,10 @@
-# Use Alpine as base to have shell for env substitution
-FROM alpine:3.19
+# Use Debian slim for glibc compatibility
+FROM debian:bookworm-slim
 
 # Install dependencies
-RUN apk add --no-cache gettext supervisor curl
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    supervisor curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy garage binary from official image
 COPY --from=dxflrs/garage:v2.1.0 /garage /garage
