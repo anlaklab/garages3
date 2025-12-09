@@ -22,17 +22,16 @@ replication_factor = 1
 compression_level = 1
 
 # RPC Configuration (inter-node communication)
-[rpc]
 # Secret key for RPC authentication (32 bytes hex)
 # Generate with: openssl rand -hex 32
 rpc_secret = "__RPC_SECRET__"
 
 # Bind address for RPC
-bind_addr = "[::]:3901"
+rpc_bind_addr = "[::]:3901"
 
 # Public address for this node (used for node discovery)
 # For Docker, use the container's reachable address
-public_addr = "127.0.0.1:3901"
+rpc_public_addr = "127.0.0.1:3901"
 
 # S3 API Configuration
 [s3_api]
